@@ -13,3 +13,4 @@ Windows schtasks.exe: https://docs.active-directory-wp.com/Usage/How_to_add_a_cr
   https://learn.microsoft.com/en-us/windows/win32/taskschd/schtasks
 
 
+tkinter Documentation: https://docs.python.org/3/library/tkinter.html#
