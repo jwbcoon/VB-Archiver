@@ -1,0 +1,16 @@
+# ytdl config file
+
+#debug configs simulate downloads and print information
+-s
+-g
+-e
+
+# Save all videos under Movies directory in your home directory
+-o ~\Desktop\PersonalRepos\TV_Archiver\TV_Archiver\dldest\%(title)s.%(ext)s
+
+# configs to try:
+#
+# --flat-playlist
+# --no-overwrites
+# --cache-dir .\\cache\
+# --write-thumbnail
