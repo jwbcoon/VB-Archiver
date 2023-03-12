@@ -1,0 +1,16 @@
+####    GOOD TOOLS    ####
+
+Can use pip install on git repositories if changes are more
+recent than those uploaded to PyPi:
+    https://adamj.eu/tech/2019/03/11/pip-install-from-a-git-repository/
+
+####    GENERAL ISSUES    ####
+
+Ran into an initial issue causing the response:
+    "Unable to extract uploader id"
+
+Solutions to this issue were found at the following sites:
+    https://github.com/ytdl-org/youtube-dl/issues/31530
+    https://github.com/ytdl-org/youtube-dl/issues/31530#issuecomment-1435975611
+    https://github.com/ytdl-org/youtube-dl/issues/31530#issuecomment-1435477247
+
