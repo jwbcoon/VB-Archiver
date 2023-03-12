@@ -1,8 +1,8 @@
-from __future__ import unicode_literals
-import youtube_dl
-#import win32com
+import subprocess
 
-ydl_opts = { '--config-location .\\config.txt' }
-with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-    ydl.download(['https://www.youtube.com/watch?v=BaW_jenozKc'])
-
+# runs the youtube-dl shell commands and redirects output to dldest
+with open('./dldest/filenames.txt', 'w') as outfile:
+    subprocess.run(['youtube-dl',
+                    'BaW_jenozKc', 
+                    '--config-location', './config.txt'],
+                   stdout=outfile)

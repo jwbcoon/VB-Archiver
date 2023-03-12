@@ -1,12 +1,13 @@
 # ytdl config file
 
 #debug configs simulate downloads and print information
--s
--g
--e
+--get-filename
 
-# Save all videos under Movies directory in your home directory
--o ~\Desktop\PersonalRepos\TV_Archiver\TV_Archiver\dldest\%(title)s.%(ext)s
+# Determine where to save files
+-o ~/Desktop/PersonalRepos/TV_Archiver/TV_Archiver/dldest/%(title)s.%(ext)s
+
+# Restrict filenames to avoid weird UTF-8 encodings
+--restrict-filenames
 
 # configs to try:
 #
