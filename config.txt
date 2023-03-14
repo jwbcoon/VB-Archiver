@@ -4,7 +4,7 @@
 --get-filename
 
 # Determine where to save files
--o ~/Desktop/PersonalRepos/TV_Archiver/TV_Archiver/dldest/%(title)s.%(ext)s
+-o ./dldest/%(title)s.%(ext)s
 
 # Restrict filenames to avoid weird UTF-8 encodings
 --restrict-filenames

@@ -129,4 +129,7 @@ dmypy.json
 .pyre/
 
 # dldest is a folder where program test output is logged
-dldest/*
+dldest/
+
+#npm stuff
+node_modules/
