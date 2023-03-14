@@ -4,7 +4,7 @@ import os
 
 # Make a video archive schedule
 def make_schedule(username, password, frequency, day):
-    dir_path = os.path.dirname(os.path.realpath(vid.__file__))
+    dir_path = os.path.dirname(os.path.abspath(vid.__file__))
     task_name = 'vb_archiver'
     task_command = ['schtasks.exe',
                     '/Create',
@@ -24,7 +24,7 @@ def get():
     args = [
         'youtube-dl',
         url,
-        '--config-location', './config.txt',
+        '--config-location', os.path.abspath('config.txt'),
         '--yes-playlist']
     return {'args': args, 'output_path': output_path}
         
