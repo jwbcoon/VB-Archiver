@@ -2,8 +2,6 @@ import subprocess
 import ytdl_scan as vid
 import os
 
-# Front facing GUI for getting data on schedule
-
 # Make a video archive schedule
 def make_schedule(username, password, frequency, day):
     dir_path = os.path.dirname(os.path.realpath(vid.__file__))

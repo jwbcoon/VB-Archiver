@@ -2,4 +2,5 @@
 echo "Installing prerequisite files..."
 pip install git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
 mkdir dldest
-npm install
+mkdir -p ./gui/node_modules/
+npm install --prefix ./gui/node_modules/
