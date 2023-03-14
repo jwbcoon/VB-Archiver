@@ -2,7 +2,7 @@
   "name": "vb-archiver",
   "version": "1.0.0",
   "description": "Schedule tasks for the computer to regularly archive video uploads from a website.",
-  "main": "main.js",
+  "main": "gui/main.js",
   "scripts": {
     "test": "test"
   },
