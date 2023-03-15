@@ -24,7 +24,7 @@ def get():
     args = [
         'youtube-dl',
         url,
-        '--config-location', os.path.abspath('config.txt'),
+        '--config-location', os.path.abspath('./py/config.txt'),
         '--yes-playlist']
     return {'args': args, 'output_path': output_path}
         
