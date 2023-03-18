@@ -1,17 +1,17 @@
 import subprocess
-import ytdl_scan as vid
+import archiver
 import os
 
 # Make a video archive schedule
-def make_schedule(username, password, frequency, day):
-    dir_path = os.path.dirname(os.path.abspath(vid.__file__))
+def make_schedule(frequency, modifier, day):
+    dir_path = ''.join([os.path.abspath(archiver.__file__), archiver.__file__])
     task_name = 'vb_archiver'
     task_command = ['schtasks.exe',
                     '/Create',
-                    '/U', username,
-                    '/P', password,
+                    '/RU', 'SYSTEM',
                     '/SC', frequency,
-                    '/D', day,
+                    '/MO', modifier,
+                    #'/D', day,
                     '/TN', task_name,
                     '/TR', dir_path]
     subprocess.run(task_command)
@@ -27,4 +27,7 @@ def get():
         '--config-location', os.path.abspath('./py/config.txt'),
         '--yes-playlist']
     return {'args': args, 'output_path': output_path}
-        
+
+
+if (__name__ == '__main__'):
+    make_schedule('MINUTE', '5', '*')
