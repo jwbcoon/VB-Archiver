@@ -4,7 +4,10 @@ import os
 
 # Make a video archive schedule
 def make_schedule(frequency, modifier, day):
-    dir_path = ''.join([os.path.abspath(archiver.__file__), archiver.__file__])
+    interp_path = '\''.join(['', os.path.abspath(os.environ['_']),''])
+    dir_path = os.path.abspath(archiver.__file__)
+    task_with_args = ' '.join([interp_path, dir_path])
+    task_with_args = '\"'.join(['', task_with_args, '']) # maybe unnecessary?
     task_name = 'vb_archiver'
     task_command = ['schtasks.exe',
                     '/Create',
@@ -13,7 +16,7 @@ def make_schedule(frequency, modifier, day):
                     '/MO', modifier,
                     #'/D', day,
                     '/TN', task_name,
-                    '/TR', dir_path]
+                    '/TR', task_with_args]
     subprocess.run(task_command)
 
 # Export data to be used in another file
