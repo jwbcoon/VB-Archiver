@@ -1,8 +1,11 @@
 import subprocess
 import logging
 import archive_schedule as schedule
+import os
 
-logging.basicConfig(filename='logs/archiver.log',
+log_file = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), 'logs/archiver.log') )
+logging.basicConfig(filename=log_file,
                     level=logging.INFO,
                     format='%(asctime)s %(levelname)s: %(message)s')
 
