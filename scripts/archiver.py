@@ -16,12 +16,12 @@ def main():
     sched_contents = schedule.contents()
     with open(sched_contents['output_path'], 'w') as outfile:
         dlproc = subprocess.run(sched_contents['args'], stdout=outfile)
-        logging.info('output_path: {0}'.format(outfile))
         logging.error('stderr: {0}'.format(dlproc.stderr))
 
-if (__name__ == '__main__'): #unsure if name should be main or archiver
-    logging.info('__name__ == {0}, line {1}'.format(__name__, currentframe().f_lineno))
+if (__name__ == '__main__'):
+    logging.info('Starting archiver. __name__ == {0}'.format(__name__))
     try:
         main()
     except Exception as e:
-        logging.error('Error starting ytdl; line {0}: \n{1}'.format(currentframe().f_lineno, e))
+        logging.error('Failed to start archiver.py; line {0}\n{1}'
+                      .format(currentframe().f_lineno, e))
