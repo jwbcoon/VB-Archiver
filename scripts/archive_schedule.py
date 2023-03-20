@@ -10,13 +10,14 @@ logging.basicConfig(filename=log_file,
                     format='%(asctime)s %(levelname)s: %(message)s')
 
 # Make a video archive schedule
-def make_schedule():
+def make_schedule(username, password):
     xml_path = os.path.abspath(
         os.path.join(os.path.dirname(archiver.__file__), './vb_archiver.xml'))
     task_name = 'vb_archiver'
     task_command = ['schtasks.exe',
                     '/Create',
-                    '/RU', 'SYSTEM',
+                    '/RU', username,
+                    '/RP', password,
                     '/TN', task_name,
                     '/XML', xml_path]
     
@@ -43,4 +44,4 @@ def contents():
 
 
 if (__name__ == '__main__'):
-    make_schedule()
+    make_schedule(os.getenv('username'), 'mynameisjoe1')
