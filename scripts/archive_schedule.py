@@ -28,7 +28,6 @@ def make_schedule(username, password):
     logging.error('stderr: {0}'.format(taskproc.stderr))
 
 # Export data to be used in another file
-
 def contents():
     output_path = os.path.abspath(
         os.path.join(os.path.dirname(archiver.__file__), '../dldest/filenames.txt') )
