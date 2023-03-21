@@ -12,7 +12,8 @@ logging.basicConfig(filename=log_file,
 # Make a video archive schedule
 def make_schedule(username, password):
     xml_path = os.path.abspath(
-        os.path.join(os.path.dirname(archiver.__file__), './vb_archiver.xml'))
+        os.path.join(os.path.split(os.path.dirname(archiver.__file__))[0],
+                     './settings/vb_archiver.xml'))
     task_name = 'vb_archiver'
     task_command = ['schtasks.exe',
                     '/Create',
@@ -36,7 +37,8 @@ def contents():
         'youtube-dl',
         url,
         '--config-location', os.path.abspath(
-            os.path.join(os.path.dirname(archiver.__file__), './config.txt')),
+            os.path.join(os.path.split(os.path.dirname(archiver.__file__))[0],
+                     './settings/config.txt')),
         '--yes-playlist']
     logging.info('Sending dldest path: {0}'.format(output_path))
     return {'args': args, 'output_path': output_path}

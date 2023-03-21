@@ -2,7 +2,6 @@ import subprocess
 import logging
 import archive_schedule as schedule
 from inspect import currentframe
-import datetime
 import os
 
 log_file = os.path.abspath(
@@ -22,9 +21,7 @@ def main():
 if (__name__ == '__main__'):
     logging.info('Starting archiver. __name__ == {0}'.format(__name__))
     try:
-        with open('testrun_vba.txt', 'a') as testout:
-            testout.write('Writing to file at {0}\n'.format(datetime.datetime.now()))
-        #main()
+        main()
     except Exception as e:
         logging.error('Failed to start archiver.py; line {0}\n{1}'
                       .format(currentframe().f_lineno, e))
