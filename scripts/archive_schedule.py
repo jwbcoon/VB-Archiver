@@ -9,11 +9,15 @@ logging.basicConfig(filename=log_file,
                     level=logging.INFO,
                     format='%(asctime)s %(levelname)s: %(message)s')
 
+# Return a schedule dict object to be converted to XML for schtasks.exe
+def profile():
+    return 0
+
 # Make a video archive schedule
 def make_schedule(username, password):
     xml_path = os.path.abspath(
         os.path.join(os.path.split(os.path.dirname(archiver.__file__))[0],
-                     './settings/vb_archiver.xml'))
+                     './settings/xml/vb_archiver.xml'))
     task_name = 'vb_archiver'
     task_command = ['schtasks.exe',
                     '/Create',
@@ -38,7 +42,7 @@ def contents():
         url,
         '--config-location', os.path.abspath(
             os.path.join(os.path.split(os.path.dirname(archiver.__file__))[0],
-                     './settings/config.txt')),
+                     './settings/ytdl.conf')),
         '--yes-playlist']
     logging.info('Sending dldest path: {0}'.format(output_path))
     return {'args': args, 'output_path': output_path}
