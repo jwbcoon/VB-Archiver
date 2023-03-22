@@ -9,4 +9,4 @@ echo "{\"python.defaultInterpreterPath\":\"\${workspaceFolder}/.venv/Scripts/pyt
 echo "Installing prerequisite files ... "
 pip install git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
 pip install dicttoxml
-npm install --prefix ./gui/node_modules/
+npm install
