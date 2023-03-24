@@ -19,7 +19,7 @@ class download_schedule(tuple(dict, dict)):
                - keys are named such that inserting two dashes in front (--) provides CLI flags
                  for running archiver.py
             '''
-            ydl_opts = dict({
+            ydl_opts = {
                 # MISC OPTIONS
                 'version': None, # print program version and exit
                 'update': None, # update ytdl to the latest version, given sufficient permissions
@@ -220,32 +220,22 @@ class download_schedule(tuple(dict, dict)):
                   'ffmpeg-location': None, # location of the ffmpeg/avconv binary; either the path to the binary or its containing directory
                   'exec': None, # execute a command on the file after downloading and post-processing, similar to find's -exec syntax. Example: --exec "adb push {} /sdcard/Music/ && rm{}"
                   'convert-subs': None # convert the subtitles to other format (currently supported: srt|ass|vtt|lrc)
-            })
+            }
+        elif not isinstance(ydl_opts, dict): # manage passing non-dict to __init__
+            raise Exception('download_schedule constructor received arguments which were not dictionaries')
+
         if sched_opts == None:
-            sched_opts = dict({
+            sched_opts = {
                 'task': {
                     'registration-info': {
                         'date': None, # task creation date
                         'author': None, # task author
-                        'version': None, # task version (default 1.0.0)
-                        'description': None # task description
+                        'URI': None, # identifier for the task
                     },
-                    'triggers': {
-                        'calendar-trigger': { # trigger on a schedule
-                            'start-boundary': None, # date of initial trigger
-                            'end-boundary': None, # date of final trigger
-                            'schedule-by-week': {
-                                'weeks-interval': None, # frequency of schedule by weeks
-                                'days-of-week': [ # specify days of the week the schedule will trigger on
-                                    'Monday'
-                                ]
-                            }
-                        }
-                    },
+                    'triggers': {},
                     'principals': {
                         'principal': {
-                            'user-id': None, # user id under whose permissions the task will be run
-                            'logon-type': None # mark the task's behavior on logon
+                            'user-id': None # user id under whose permissions the task will be run
                         }
                     },
                     'settings': {
@@ -259,7 +249,10 @@ class download_schedule(tuple(dict, dict)):
                         }
                     }
                 }
-            })
+            }
+        elif not isinstance(sched_opts, dict): # manage passing non-dict to __init__
+            raise Exception('download_schedule constructor received arguments which were not dictionaries')
+
         self.ydl_opts = ydl_opts
         self.sched_opts = sched_opts
 
