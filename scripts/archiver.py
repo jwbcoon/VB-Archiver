@@ -1,7 +1,5 @@
 import subprocess
 import archive_schedule as schedule
-#from inspect import currentframe
-#import os
 
 # runs the youtube-dl shell commands and redirects output to dldest/filenames.txt
 def main():

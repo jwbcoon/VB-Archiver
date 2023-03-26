@@ -17,7 +17,7 @@ class schedule_config(tuple):
         
             - values default to None
             - keys are named such that inserting two dashes in front (--) provides CLI flags
-                for running archiver.py
+              for running youtube-dl in subprocess of archiver.py
         '''
         if ydl_opts == None:
             ydl_opts = {
@@ -259,6 +259,12 @@ class schedule_config(tuple):
     
     def __str__(self):
         return json.dumps(self[0], indent=4) + '\n\n' + json.dumps(self[1], indent=4)
+    
+    def ydl_profile(self):
+        return self[0]
+    
+    def sched_profile(self):
+        return self[1]
 
     # Make a video archive schedule
     def make_schedule(username, password):
