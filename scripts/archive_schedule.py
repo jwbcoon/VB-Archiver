@@ -1,6 +1,23 @@
+from vba_schedule import vba_schedule as vbas, BASE_SCHED_OPTS
+from copy import deepcopy
 import subprocess
-from vba_schedule import vba_schedule as vbas
+import datetime
 import os
+
+def init_schedule():
+    schedule = deepcopy(BASE_SCHED_OPTS)
+    for key, value in schedule.items():
+        if key == 'date':
+            value = datetime.datetime.now()
+        if key == 'author':
+            value = os.getenv('username')
+        if key == 'URI':
+            value = '\\vb_archiver'
+        if key == 'triggers':
+            value = {}
+        if key == 'user-id':
+            value = 'S-1-5-18'
+    return schedule
 
 # Make a video archive schedule
 def make_schedule(task_name, xml_path):

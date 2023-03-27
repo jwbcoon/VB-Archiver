@@ -1,5 +1,6 @@
 from json import dumps
 from schema import Schema, Optional, Use, And, Or
+from copy import deepcopy
 import os
 import re
 
@@ -535,6 +536,16 @@ XML_SCHEMA = Schema(
     }
 )
 
+
+'''
+ydl_opts based on https://github.com/ytdl-org/youtube-dl/blob/master/README.md#options
+sched_opts based on Windows Task Scheduler XML exports
+
+    - empty dict is considered valid, provided values must conform to optional elements
+        laid out in YDL_SCHEMA
+    - keys are named such that inserting two dashes in front (--) provides CLI flags
+        for running youtube-dl in subprocess of archiver.py
+'''
 BASE_YDL_OPTS = {
     # MISC OPTIONS
     'version': None, # print program version and exit
@@ -778,15 +789,6 @@ class vba_schedule(tuple):
         self.url = url
 
     def __new__(cls, ydl_opts=None, sched_opts=None):
-        '''
-        ydl_opts based on https://github.com/ytdl-org/youtube-dl/blob/master/README.md#options
-        sched_opts based on Windows Task Scheduler XML exports
-        
-            - empty dict is considered valid, provided values must conform to optional elements
-              laid out in YDL_SCHEMA
-            - keys are named such that inserting two dashes in front (--) provides CLI flags
-              for running youtube-dl in subprocess of archiver.py
-        '''
         if (ydl_opts == None):
             ydl_opts = {}
         elif not isinstance(ydl_opts, dict): # reject passing non-dict to __new__
@@ -806,10 +808,10 @@ class vba_schedule(tuple):
             dumps(self[0], indent=4),
             dumps(self[1], indent=4) )
     
-    def ydl_profile(self):
+    def ydl_profile(self) -> dict:
         return self[0]
     
-    def sched_profile(self):
+    def sched_profile(self) -> dict:
         return self[1]
     
     def update_ydl(self, kvpair):
@@ -823,3 +825,14 @@ class vba_schedule(tuple):
             self[1].update(kvpair)
         except:
             raise
+    '''
+    Copy the ydl of other_vbas into self
+    '''
+    def copy_ydl(self, other_vbas):
+        self[0] = deepcopy(other_vbas[0])
+
+    '''
+    Copy the schedule of other_vbas into self
+    '''
+    def copy_sched(self, other_vbas):
+        self[1] = deepcopy(other_vbas[1])
