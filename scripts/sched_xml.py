@@ -1,6 +1,6 @@
 import dicttoxml as dtx
 import archive_schedule as sched
-from vba_schedule import XML_SCHEMA
+from vba_schedule.models import XML_SCHEMA
 
 # TODO: Template for generating xml files according to the task scheduler schema
 
