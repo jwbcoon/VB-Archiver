@@ -42,7 +42,7 @@ def init_schedule() -> dict:
     return schedule
 
 # Make a video archive schedule
-def make_schedule(task_name, xml_path):
+def start_schedule(task_name, xml_path):
     task_command = ['schtasks.exe',
                     '/Create',
                     '/RU', 'SYSTEM',
@@ -69,4 +69,4 @@ current = vbas()
 
 if (__name__ == '__main__'):
     print(current)
-    make_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))
+    start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))
