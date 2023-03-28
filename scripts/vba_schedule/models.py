@@ -7,7 +7,7 @@ SYSTEM_ID = 'S-1-5-18' # Windows Task Scheduler "SYSTEM" user-id
 # https://stackoverflow.com/questions/66140495/python-how-to-check-the-string-is-a-utc-timestamp
 # regex pattern to confirm ISO8601 format conformity from time strings, primarily for task scheduling
 # validates "yyyy-(m)m-(d)dT(h)h:(m)m:(s)s.s(ssssss)"
-DATETIME_ISO8601 = re.compile(
+DATETIME_ISO8601_PATTERN = re.compile(
     r'^([0-9]{4})' r'-' r'([0-9]{1,2})' r'-' r'([0-9]{1,2})' # date
     r'([T\s][0-9]{1,2}:[0-9]{1,2}:?[0-9]{1,2}(\.[0-9]{1,7})?)?' # time
 )
@@ -16,9 +16,9 @@ DATETIME_ISO8601 = re.compile(
 # https://learn.microsoft.com/en-us/windows/win32/taskschd/taskschedulerschema-deadline-element
 # attempt at creating regex pattern to confirm duration type conformity in XML elements
 # validates "P(nY)(nM)(nD)T(nH)(nM)(nS)" such that the minimum input is P1M (1 minute duration)
-XML_DURATION = re.compile(
-    r'^([0-9]{4})' r'-' r'([0-9]{1,2})' r'-' r'([0-9]{1,2})' # date
-    r'([T\s][0-9]{1,2}:[0-9]{1,2}:?[0-9]{1,2}(\.[0-9]{1,7})?)?' # time
+XML_DURATION_PATTERN = re.compile(
+    r'P([123]Y)?' r'([01]?[012]M)?' r'([123]?[0-9]?[0-9]D)?' # date
+    r'T?([0-7]?[0-9]H)?' r'([012]?[0-9]?[0-9]M)?' r'([012]?[0-9]?[0-9]S)?' # time
 )
 
 '''
@@ -345,7 +345,7 @@ YDL_SCHEMA = Schema(
 XML_SCHEMA = Schema(
     {
         'registration-info': {
-            'date': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))), # task creation date is in ISO8601 Time Format
+            'date': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))), # task creation date is in ISO8601 Time Format
             'author': str, # task author
             'URI': str, # identifier for the task
             Optional('description'): str,
@@ -356,16 +356,16 @@ XML_SCHEMA = Schema(
         },
         'triggers': And({
             Optional('boot-trigger') : {
-                'delay': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION)))
+                'delay': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration)))
             },
             Optional('calendar-trigger'): {
-                'end-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
-                'start-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
+                'end-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
+                'start-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
                 Optional('enabled', default=True): bool,
-                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 Optional('repetition'): {
-                    'interval': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))), None),
+                    'interval': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))), None),
                     Optional('stop-at-duration-end'): bool
                 },
                 Optional('schedule-by-day'): {
@@ -428,61 +428,61 @@ XML_SCHEMA = Schema(
                 }
             },
             Optional('event-trigger'): {
-                'end-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
-                'start-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
+                'end-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
+                'start-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
                 Optional('enabled', default=True): bool,
-                Optional('delay'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                Optional('delay'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 Optional('repetition'): {
-                    'interval': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))), None),
+                    'interval': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))), None),
                     Optional('stop-at-duration-end'): bool
                 },
                 Optional('subscription'): [] # seems complicated https://learn.microsoft.com/en-us/windows/win32/taskschd/taskschedulerschema-eventtrigger-triggergroup-element
             },
             Optional('idle-trigger'): {
-                'end-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
-                'start-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
+                'end-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
+                'start-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
                 Optional('enabled', default=True): bool,
-                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 Optional('repetition'): {
-                    'interval': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))), None),
+                    'interval': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))), None),
                     Optional('stop-at-duration-end'): bool
                 }
             },
             Optional('logon-trigger'): {
                 'user-id': And(str, lambda s: len(s) > 0),
-                'delay': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                'end-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
-                'start-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
+                'delay': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                'end-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
+                'start-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
                 Optional('enabled', default=True): bool,
-                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 Optional('repetition'): {
-                    'interval': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))), None),
+                    'interval': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))), None),
                     Optional('stop-at-duration-end'): bool
                 }
             },
             Optional('registration-trigger'): {
-                'delay': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                'end-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
-                'start-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
+                'delay': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                'end-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
+                'start-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
                 Optional('enabled', default=True): bool,
-                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 Optional('repetition'): {
-                    'interval': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))), None),
+                    'interval': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))), None),
                     Optional('stop-at-duration-end'): bool
                 }
             },
             Optional('time-trigger'): {
-                'end-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
-                'start-boundary': And(str, lambda date: bool(re.fullmatch(date, DATETIME_ISO8601))),
+                'end-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
+                'start-boundary': And(str, lambda date: bool(re.fullmatch(DATETIME_ISO8601_PATTERN, date))),
                 Optional('enabled', default=True): bool,
-                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 Optional('repetition'): {
-                    'interval': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))), None),
+                    'interval': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                    Optional('duration'): Or(And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))), None),
                     Optional('stop-at-duration-end'): bool
                 }
             },
@@ -501,23 +501,23 @@ XML_SCHEMA = Schema(
             Optional('enabled', default=True): bool, # enable the task to run when triggered
             Optional('allow-start-on-demand', default=True): bool, # allow the user to run the program on demand
             Optional('allow-hard-terminate', default=True): bool, # allow the user to end the task while it is running
-            Optional('delete-expired-task-after'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+            Optional('delete-expired-task-after'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
             Optional('disallow-start-if-on-batteries', default=False): bool, # default to false to counteract Task Scheduler defaults
-            Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+            Optional('execution-time-limit'): And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
             Optional('hidden', default=False): bool,
             Optional('idle-settings'): {
                 'stop-on-idle-end': bool,
                 'restart-on-idle': bool
             },
             Optional('maintenance-settings'): {
-                'deadline': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
-                'period': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                'deadline': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
+                'period': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 Optional('exclusive'): bool
             },
             Optional('multiple-instances-policy'): Or('Parallel', 'Queue', 'IgnoreNew', 'StopExisting'),
             Optional('priority'): And(Use(int), lambda n: 0 <= n <= 10),
             Optional('restart-on-failure'): {
-                'interval': And(str, lambda duration: bool(re.fullmatch(duration, XML_DURATION))),
+                'interval': And(str, lambda duration: bool(re.fullmatch(XML_DURATION_PATTERN, duration))),
                 'count': And(Use(int), lambda n: 0 <= n <= 255)
             },
             Optional('run-only-if-idle', default=False): bool,

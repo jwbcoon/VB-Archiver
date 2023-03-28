@@ -34,7 +34,7 @@ def init_schedule() -> dict:
                         'start-boundary': init_date.isoformat(),
                         'end-boundary': (init_date + dt.timedelta(minutes=1)).isoformat(),
                         'repetition': {
-                            'interval': 'P1M' # maybe use regex to generate time in this format?
+                            'interval': 'PT1M' # maybe use regex to generate time in this format?
                         }
                     }
             }

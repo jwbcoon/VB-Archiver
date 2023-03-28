@@ -24,11 +24,11 @@ def recursive_items(dictionary):
             yield (camelkey, value)
 
 def generatexml(sched_dict: dict, pretty=False):
-    xml_dict = {key: value for key, value in recursive_items(sched_dict)}
+    xml_dict = {key: value for key, value in recursive_items(XML_SCHEMA.validate(sched_dict))}
     if xml_dict['RegistrationInfo'].get('Uri'): # This if statment feels like a bad fix
         xml_dict['RegistrationInfo']['URI'] = xml_dict['RegistrationInfo'].pop('Uri')
     try:
-        ret_xml = dtx.dicttoxml(xml_dict,
+        ret_xml = dtx.dicttoxml((xml_dict),
                                 custom_root='Task',
                                 attr_type=False)
     except:
