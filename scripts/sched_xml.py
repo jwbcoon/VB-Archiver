@@ -9,22 +9,22 @@ def camelcase(hyphen_str: str):
     return ''.join([s.capitalize() for s in hyphen_str.replace('-',' ').split()])
 
 # generate a dictionary copy with modified keys to conform to Windows Task Scheduler XML
-def recursive_items(dictionary):
+def modified_items(dictionary: dict, modify=lambda a: a):
     for key, value in dictionary.items():
-        camelkey = camelcase(key)
+        modkey = modify(key)
         if type(value) is dict:
-            nestval = ({k: v for k, v in recursive_items(value)})
-            yield (camelkey, nestval)
+            nestval = ({k: v for k, v in modified_items(value, modify)})
+            yield (modkey, nestval)
         elif (type(value) is list or type(value) is tuple) and type(value) is not str:
             for ele in value:
                 if type(ele) is dict:
-                    elnestval = ({k: v for k, v in recursive_items(ele)})
-                    yield (camelkey, elnestval)
+                    elnestval = ({k: v for k, v in modified_items(ele, modify)})
+                    yield (modkey, elnestval)
         else:
-            yield (camelkey, value)
+            yield (modkey, value)
 
 def generatexml(sched_dict: dict, pretty=False):
-    xml_dict = {key: value for key, value in recursive_items(XML_SCHEMA.validate(sched_dict))}
+    xml_dict = {key: value for key, value in modified_items(XML_SCHEMA.validate(sched_dict), camelcase)}
     if xml_dict['RegistrationInfo'].get('Uri'): # This if statment feels like a bad fix
         xml_dict['RegistrationInfo']['URI'] = xml_dict['RegistrationInfo'].pop('Uri')
     try:
