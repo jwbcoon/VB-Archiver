@@ -65,6 +65,8 @@ class vba_schedule(tuple):
     '''
     def copy_sched(self, src_dict=None, src_vbas=None):
         if (src_dict and isinstance(src_dict, dict)):
-            self[1] = deepcopy(src_dict)
+            self[1].clear()
+            self[1].update(deepcopy(src_dict))
         elif(src_vbas and isinstance(src_vbas, vba_schedule)):
-            self[1] = deepcopy(src_vbas[1])
+            self[1].clear()
+            self[1].update(deepcopy(src_vbas[1]))

@@ -1,8 +1,9 @@
-from vba_schedule.models import BASE_SCHED_OPTS
+from vba_schedule.models import BASE_SCHED_OPTS, SYSTEM_ID
 from vba_schedule.vba_schedule import vba_schedule as vbas
 from copy import deepcopy
+from sched_xml import generatexml
 import subprocess
-import datetime
+import datetime as dt
 import os
 
 # initialize a base vba_schedule to manage vba download schedules
@@ -14,50 +15,54 @@ def init_vbas() -> vbas:
 # initialize a base schedule config for users to interface with
 def init_schedule() -> dict:
     schedule = deepcopy(BASE_SCHED_OPTS)
-    init_date = datetime.datetime.now()
-    for key in schedule.keys():
-        try:
-            if key == 'date':
-                schedule[key] = init_date.isoformat()
-            if key == 'author':
-                schedule[key] = os.getenv('username')
-            if key == 'URI':
-                schedule[key] = '\\vb_archiver'
-            if key == 'triggers':
-                schedule[key] = {
-                    'calendar-trigger': {
-                            'start-boundary': init_date.isoformat(),
-                            'end-boundary': (init_date + datetime.timedelta(minutes=1)).isoformat(),
-                            'repetition': {
-                                'interval': 'P1M'
-                            }
+    init_date = dt.datetime.now()
+    for outer_key in schedule.keys(): # "task" key always points to a set of dict values
+        if outer_key == 'registration-info':
+            for config_key in schedule[outer_key].keys():
+                try:
+                    if config_key == 'date':
+                        schedule[outer_key][config_key] = init_date.isoformat()
+                    if config_key == 'author':
+                        schedule[outer_key][config_key] = os.getenv('username')
+                    if config_key == 'URI':
+                        schedule[outer_key][config_key] = 'vb_archiver'
+                except:
+                    raise
+        if outer_key == 'triggers':
+            schedule[outer_key] = {
+                'calendar-trigger': {
+                        'start-boundary': init_date.isoformat(),
+                        'end-boundary': (init_date + dt.timedelta(minutes=1)).isoformat(),
+                        'repetition': {
+                            'interval': 'P1M' # maybe use regex to generate time in this format?
                         }
-                }
-            if key == 'user-id':
-                schedule[key] = 'S-1-5-18' # Windows Task Scheduler SYSTEM user-id
-            if key == 'command':
-                schedule[key] = os.path.abspath(os.path.dirname(__file__)) # this file is in the same dir as archive.bat
-        except:
-            raise
+                    }
+            }
+        if outer_key == 'principals':
+            schedule[outer_key][0]['principal']['user-id'] = SYSTEM_ID # Windows Task Scheduler SYSTEM user-id
+        if outer_key == 'actions':
+            schedule[outer_key]['exec']['command'] = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), './archive.bat')) # this file is in the same dir as archive.bat
+        
     return schedule
 
 # Make a video archive schedule
-def start_schedule(task_name, xml_path):
+def start_schedule(task_name, xml_file):
     task_command = ['schtasks.exe',
                     '/Create',
                     '/RU', 'SYSTEM',
                     '/TN', task_name,
-                    '/XML', xml_path]
+                    '/XML', xml_file]
     subprocess.run(task_command)
 
 # Export data to be used in another file
 def contents(vbas: vbas) -> dict: # receive vbas object to dissect contents and export ydl command?
     output_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '../dldest/filenames.txt') )
-    url = 'https://www.twitch.tv/northbaysmash/videos?filter=highlights&sort=time'
+    vbas.url = 'https://www.twitch.tv/northbaysmash/videos?filter=highlights&sort=time'
     args = [
         'youtube-dl',
-        url,
+        vbas.url,
         '--config-location', os.path.abspath(
             os.path.join(os.path.split(os.path.dirname(__file__))[0],
                     './settings/ytdl.conf')),
@@ -65,8 +70,8 @@ def contents(vbas: vbas) -> dict: # receive vbas object to dissect contents and 
     return {'args': args, 'output_path': output_path}
 
 
-current = vbas()
+current = init_vbas()
 
 if (__name__ == '__main__'):
-    print(current)
-    start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))
+    print(generatexml(current.sched_profile(), pretty=True))
+    #start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))
