@@ -6,7 +6,7 @@ from vba_schedule.models import XML_SCHEMA
 
 def generatexml(sched_dict: dict, pretty=False):
     camelcase = lambda hyphen_str: (''.join([s.capitalize() for s in hyphen_str.replace('-',' ').split()])).replace('Uri', 'URI')
-    xml_dict = {key: value for key, value in XML_SCHEMA.validate(sched_dict).modified_items(modify_key=camelcase)}
+    xml_dict = XML_SCHEMA.validate(sched_dict).modified_dict(modify_key=camelcase)
     try:
         ret_xml = dtx.dicttoxml((xml_dict),
                                 custom_root='Task',
