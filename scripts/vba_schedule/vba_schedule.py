@@ -1,5 +1,6 @@
 from json import dumps
 from copy import deepcopy
+from deepdict import deepdict
 
 '''
 vba_schedule objects are tuple pairs of configurations as dicts:
@@ -16,11 +17,11 @@ class vba_schedule(tuple):
 
     def __new__(cls, ydl_opts=None, sched_opts=None):
         if (ydl_opts == None):
-            ydl_opts = {}
+            ydl_opts = deepdict()
         elif not isinstance(ydl_opts, dict): # reject passing non-dict to __new__
             raise Exception('vba_schedule __new__ method received arguments which were not dictionaries')
         if (sched_opts == None):
-            sched_opts = {}
+            sched_opts = deepdict()
         elif not isinstance(sched_opts, dict): # reject passing non-dict to __new__
             raise Exception('vba_schedule __new__ method received arguments which were not dictionaries')
 
