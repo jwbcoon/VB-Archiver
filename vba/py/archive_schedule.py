@@ -1,7 +1,8 @@
-from vba_schedule.models import BASE_SCHED_OPTS, SYSTEM_ID
-from vba_schedule.vba_schedule import vba_schedule as vbas
+from lib.models import BASE_SCHED_OPTS, SYSTEM_ID, XML_SCHEMA
+from lib.vba_schedule import vba_schedule as vbas
 from copy import deepcopy
-from sched_xml import generatexml
+from xml.dom.minidom import parseString
+import dicttoxml as dtx
 import subprocess
 import datetime as dt
 import os
@@ -42,9 +43,31 @@ def init_schedule() -> dict:
             schedule[outer_key][0]['principal']['user-id'] = SYSTEM_ID # Windows Task Scheduler SYSTEM user-id
         if outer_key == 'actions':
             schedule[outer_key]['exec']['command'] = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), './archive.bat')) # this file is in the same dir as archive.bat
+                os.path.join(os.path.dirname(__file__), './scripts/archive.bat')) # this file is in the same dir as archive.bat
         
     return schedule
+
+
+def generatexml(sched_dict: dict, pretty=False):
+    camelcase = lambda hyphen_str: (''.join([s.capitalize() for s in hyphen_str.replace('-',' ').split()])).replace('Uri', 'URI')
+    xml_dict = XML_SCHEMA.validate(sched_dict).modified_dict(modify_key=camelcase)
+    try:
+        ret_xml = dtx.dicttoxml((xml_dict),
+                                custom_root='Task',
+                                attr_type=False)
+    except:
+        raise
+    if pretty:
+        xml_string = parseString(ret_xml)
+        xml_string = xml_string.toprettyxml().replace(
+            '<Task>',
+            '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">')
+        xml_string = xml_string.replace(
+            '<?xml version=\"1.0\" ?>',
+            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>'
+        )
+        return xml_string
+    return ret_xml
 
 # Make a video archive schedule
 def start_schedule(task_name, xml_file):
@@ -58,7 +81,7 @@ def start_schedule(task_name, xml_file):
 # Export data to be used in another file
 def contents(vbas: vbas) -> dict: # receive vbas object to dissect contents and export ydl command?
     output_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '../dldest/filenames.txt') )
+        os.path.join(os.path.dirname(__file__), '../../dldest/filenames.txt') )
     vbas.url = 'https://www.twitch.tv/northbaysmash/videos?filter=highlights&sort=time'
     args = [
         'youtube-dl',
