@@ -136,3 +136,6 @@ node_modules/
 
 # vscode
 .vscode/
+
+# whitelist
+!./vba/py/lib/
