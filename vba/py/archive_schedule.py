@@ -1,5 +1,5 @@
-from lib.models import BASE_SCHED_OPTS, SYSTEM_ID, XML_SCHEMA
-from lib.vba_schedule import vba_schedule as vbas
+from vba.py.lib.models import BASE_SCHED_OPTS, SYSTEM_ID, XML_SCHEMA
+from vba.py.lib.vba_schedule import vba_schedule as vbas
 from copy import deepcopy
 from xml.dom.minidom import parseString
 import dicttoxml as dtx
@@ -95,22 +95,17 @@ def start_schedule(task_name, xml_file):
     subprocess.run(task_command)
 
 # Export data to be used in another file
-def contents(vbas: vbas) -> dict: # receive vbas object to dissect contents and export ydl command?
-    output_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '../../dldest/filenames.txt') )
-    vbas.url = 'https://www.twitch.tv/northbaysmash/videos?filter=highlights&sort=time'
-    args = [
-        'youtube-dl',
-        vbas.url,
-        '--config-location', os.path.abspath(
-            os.path.join(os.path.split(os.path.dirname(__file__))[0],
-                    './settings/ytdl.conf')),
-        '--yes-playlist']
+def contents(vb: vbas) -> dict: # receive vbas object to dissect contents and export ydl command?
+    output_path = os.path.abspath( os.path.join(os.path.dirname(__file__), '../../dldest/filenames.txt') )
+    vb.url = 'https://www.twitch.tv/northbaysmash/videos?filter=highlights&sort=time'
+    ydl_opts = (element for item in vb.ydl_opts.modified_items(modify_key=lambda k: '--' + k) for element in item)
+    args = ['youtube-dl', vb.url]
+    args.extend(ele for ele in ydl_opts)
     return {'args': args, 'output_path': output_path}
 
 
 current = init_vbas()
 
 if (__name__ == '__main__'):
-    print(generatexml(current.sched_profile(), write=True, pretty=True))
+    print(generatexml(current.sched_opts, write=True, pretty=True))
     #start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))

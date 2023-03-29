@@ -1,6 +1,6 @@
 from json import dumps
 from copy import deepcopy
-from lib.deepdict import deepdict
+from vba.py.lib.deepdict import deepdict
 
 '''
 vba_schedule objects are tuple pairs of configurations as dicts:
@@ -13,61 +13,53 @@ vba_schedule objects have one additionaly member variable:
 '''
 class vba_schedule(tuple):
     def __init__(self, url=None) -> None:
+        self.ydl_opts = self[0]
+        self.sched_opts = self[1]
         self.url = url
 
-    def __new__(cls, ydl_opts=None, sched_opts=None):
-        if (ydl_opts == None):
-            ydl_opts = deepdict()
-        elif not isinstance(ydl_opts, dict): # reject passing non-dict to __new__
-            raise Exception('vba_schedule __new__ method received arguments which were not dictionaries')
-        if (sched_opts == None):
-            sched_opts = deepdict()
-        elif not isinstance(sched_opts, dict): # reject passing non-dict to __new__
-            raise Exception('vba_schedule __new__ method received arguments which were not dictionaries')
-
-        self = super(vba_schedule, cls).__new__(cls, [ydl_opts, sched_opts])
-
+    def __new__(cls):
+        self = super(vba_schedule, cls).__new__(cls, [deepdict(), deepdict()])
         return self
     
     def __str__(self): # use json.dumps to format string output
         return '\tvba_schedule object --\n\ttarget URL: {}\n\n{}\n\n{}'.format(
             self.url,
-            dumps(self[0], indent=4),
-            dumps(self[1], indent=4) )
+            dumps(self.ydl_opts, indent=4),
+            dumps(self.sched_opts, indent=4) )
     
-    def ydl_profile(self) -> dict:
-        return self[0]
+    def __deepcopy__(self, memo): # reference: https://stackoverflow.com/questions/1500718/how-to-override-the-copy-deepcopy-operations-for-a-python-object
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for key, value in self.__dict__.items():
+            setattr(result, key, deepcopy(value, memo))
+        return result
     
-    def sched_profile(self) -> dict:
-        return self[1]
-    
-    def update_ydl(self, kvpair):
+    def update_ydl(self, key, value):
         try:
-            self[0].update(kvpair)
+            self.ydl_opts.update({key: value})
         except:
             raise
 
-    def update_sched(self, kvpair):
+    def update_sched(self, key, value):
         try:
-            self[1].update(kvpair)
+            self.sched_opts.update({key: value})
         except:
             raise
     '''
     Deep copy the ydl of src_vbas into self
     '''
     def copy_ydl(self, src_dict=None, src_vbas=None):
-        if (src_dict and isinstance(src_dict, dict)):
-            self[0] = deepcopy(src_dict)
-        elif(src_vbas and isinstance(src_vbas, vba_schedule)):
-            self[0] = deepcopy(src_vbas[0])
+        if src_dict and isinstance(src_dict, dict):
+            self.ydl_opts = deepcopy(src_dict)
+        elif src_vbas and isinstance(src_vbas, vba_schedule):
+            self.ydl_opts = deepcopy(src_vbas[0])
 
     '''
     Deep copy the schedule of src_vbas into self
     '''
     def copy_sched(self, src_dict=None, src_vbas=None):
-        if (src_dict and isinstance(src_dict, dict)):
-            self[1].clear()
-            self[1].update(deepcopy(src_dict))
-        elif(src_vbas and isinstance(src_vbas, vba_schedule)):
-            self[1].clear()
-            self[1].update(deepcopy(src_vbas[1]))
+        if src_dict and isinstance(src_dict, dict):
+            self.sched_opts.update(deepcopy(src_dict))
+        elif src_vbas and isinstance(src_vbas, vba_schedule):
+            self.sched_opts.update(deepcopy(src_vbas.sched_opts))
