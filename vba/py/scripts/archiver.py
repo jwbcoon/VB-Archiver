@@ -1,6 +1,6 @@
 import subprocess
 import archive_schedule as schedule
-from lib.vba_schedule import vba_schedule as vbas
+from py.lib.vba_schedule import vba_schedule as vbas
 
 # runs the youtube-dl shell commands and redirects output to dldest/filenames.txt
 def main(vb: vbas):
