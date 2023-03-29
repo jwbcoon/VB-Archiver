@@ -48,7 +48,7 @@ def init_schedule() -> dict:
     return schedule
 
 
-def generatexml(sched_dict: dict, pretty=False):
+def generatexml(sched_dict: dict, write=False, pretty=False):
     camelcase = lambda hyphen_str: (''.join([s.capitalize() for s in hyphen_str.replace('-',' ').split()])).replace('Uri', 'URI')
     xml_dict = XML_SCHEMA.validate(sched_dict).modified_dict(modify_key=camelcase)
     try:
@@ -57,17 +57,33 @@ def generatexml(sched_dict: dict, pretty=False):
                                 attr_type=False)
     except:
         raise
+
+    xml_string = parseString(ret_xml)
+
     if pretty:
-        xml_string = parseString(ret_xml)
         xml_string = xml_string.toprettyxml().replace(
             '<Task>',
             '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">')
         xml_string = xml_string.replace(
             '<?xml version=\"1.0\" ?>',
-            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>'
-        )
-        return xml_string
-    return ret_xml
+            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>')
+    else:
+        xml_string = xml_string.toxml().replace(
+            '<Task>',
+            '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">')
+        xml_string = xml_string.replace(
+            '<?xml version=\"1.0\" ?>',
+            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>')
+        
+    try:
+        with open(os.path.abspath(os.path.join(os.path.split(os.path.dirname(__file__))[0],
+                  './settings/xml/{}'.format((sched_dict['registration-info']['URI']) + '.xml'))),
+                  'wb') as file:
+            file.write(xml_string.encode('utf-16'))
+    except:
+        raise
+
+    return xml_string
 
 # Make a video archive schedule
 def start_schedule(task_name, xml_file):
@@ -96,5 +112,5 @@ def contents(vbas: vbas) -> dict: # receive vbas object to dissect contents and 
 current = init_vbas()
 
 if (__name__ == '__main__'):
-    print(generatexml(current.sched_profile(), pretty=True))
+    print(generatexml(current.sched_profile(), write=True, pretty=True))
     #start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))
