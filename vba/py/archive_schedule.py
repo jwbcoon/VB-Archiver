@@ -47,41 +47,43 @@ def init_schedule() -> dict:
         
     return schedule
 
-
+'''
+Receive dict object as a parameter and convert it to an XML string. Use keywords
+write and pretty to control whether files are written with this XML and to enable
+whitespace in the XML string.
+'''
 def generatexml(sched_dict: dict, write=False, pretty=False):
     camelcase = lambda hyphen_str: (''.join([s.capitalize() for s in hyphen_str.replace('-',' ').split()])).replace('Uri', 'URI')
-    xml_dict = XML_SCHEMA.validate(sched_dict).modified_dict(modify_key=camelcase)
+    xml_dict = XML_SCHEMA.validate(sched_dict).modified_copy(modify_key=camelcase)
     try:
-        ret_xml = dtx.dicttoxml((xml_dict),
+        xml_bytes = dtx.dicttoxml((xml_dict),
                                 custom_root='Task',
                                 attr_type=False)
     except:
         raise
 
-    xml_string = parseString(ret_xml)
+    xml_string = parseString(xml_bytes)
 
     if pretty:
-        xml_string = xml_string.toprettyxml().replace(
-            '<Task>',
-            '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">')
-        xml_string = xml_string.replace(
-            '<?xml version=\"1.0\" ?>',
-            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>')
+        xml_string = xml_string.toprettyxml()
     else:
-        xml_string = xml_string.toxml().replace(
+        xml_string = xml_string.toxml()
+
+    xml_string = xml_string.replace(
             '<Task>',
-            '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">')
-        xml_string = xml_string.replace(
+            '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">'
+            ).replace(
             '<?xml version=\"1.0\" ?>',
-            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>')
+            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>' )
         
-    try:
-        with open(os.path.abspath(os.path.join(os.path.split(os.path.dirname(__file__))[0],
-                  './settings/xml/{}'.format((sched_dict['registration-info']['URI']) + '.xml'))),
-                  'wb') as file:
-            file.write(xml_string.encode('utf-16'))
-    except:
-        raise
+    if write:
+        try:
+            with open(os.path.abspath(os.path.join(os.path.split(os.path.dirname(__file__))[0],
+                    './settings/xml/{}'.format((sched_dict['registration-info']['URI']) + '.xml'))),
+                    'wb') as file:
+                file.write(xml_string.encode('utf-16'))
+        except:
+            raise
 
     return xml_string
 
@@ -97,15 +99,24 @@ def start_schedule(task_name, xml_file):
 # Export data to be used in another file
 def contents(vb: vbas) -> dict: # receive vbas object to dissect contents and export ydl command?
     output_path = os.path.abspath( os.path.join(os.path.dirname(__file__), '../../dldest/filenames.txt') )
+
+    # when fully implemented, this line of code should not exist, the attribute should be in the param
     vb.url = 'https://www.twitch.tv/northbaysmash/videos?filter=highlights&sort=time'
-    ydl_opts = (element for item in vb.ydl_opts.modified_items(modify_key=lambda k: '--' + k) for element in item)
+
+    # generator gives an item from ydl_opts.modified_items() such that {'key':'value'} -> {'--key':'value'}
+    ydl_opts = (element for item in vb.ydl_opts.modified_items(modify_key=lambda key: '--' + key) for element in item)
+
+    # first two arguments of command are the ydl command and destination url
     args = ['youtube-dl', vb.url]
+
+    # add each key:value pair in order to match options with their arguments
     args.extend(ele for ele in ydl_opts)
+
     return {'args': args, 'output_path': output_path}
 
 
 current = init_vbas()
 
-if (__name__ == '__main__'):
+if __name__ == '__main__':
     print(generatexml(current.sched_opts, write=True, pretty=True))
     #start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))
