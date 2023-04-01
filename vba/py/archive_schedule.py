@@ -36,7 +36,7 @@ def init_schedule() -> dict:
                 os.path.join(os.path.dirname(__file__), './scripts/archive.bat')) # this file is in the same dir as archive.bat
         return v
 
-    schedule = deepcopy(BASE_SCHED_OPTS).conditional_copy(
+    schedule = BASE_SCHED_OPTS.conditional_copy(
         value_conditional=lambda k, v: k in BASE_SCHED_OPTS.flat_keys(),
         value_true=init_values,
         two_value_args=True)
@@ -114,6 +114,5 @@ def contents(vb: vbas) -> dict: # receive vbas object to dissect contents and ex
 current = init_vbas()
 
 if __name__ == '__main__':
-    print(current)
-    #print(generatexml(current.sched_opts, pretty=True))
+    print(generatexml(current.sched_opts, pretty=True))
     #start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))
