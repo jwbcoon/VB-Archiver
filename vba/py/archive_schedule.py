@@ -99,14 +99,14 @@ def contents(vb: vbas) -> dict: # receive vbas object to dissect contents and ex
     # when fully implemented, this line of code should not exist, the attribute should be in the param
     vb.url = 'https://www.twitch.tv/northbaysmash/videos?filter=highlights&sort=time'
 
-    # generator gives an item from ydl_opts.modified_items() such that {'key':'value'} -> {'--key':'value'}
-    ydl_opts = (element for item in vb.ydl_opts.modified_items(modify_key=lambda key: '--' + key) for element in item)
+    # generator gives an item from ydl_opts.modified_copy() such that {'key':'value'} -> {'--key':'value'}
+    ydl_opts = vb.ydl_opts.modified_copy(modify_key=lambda key: '--' + key)
 
     # first two arguments of command are the ydl command and destination url
     args = ['youtube-dl', vb.url]
 
     # add each key:value pair in order to match options with their arguments
-    args.extend(ele for ele in ydl_opts)
+    args.extend(item for tup in zip(ydl_opts.keys(), ydl_opts.values()) for item in tup)
 
     return {'args': args, 'output_path': output_path}
 

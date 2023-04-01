@@ -183,17 +183,33 @@ class deepdict(dict):
                                                                  two_key_args,
                                                                  two_value_args)})
     
-    def __flat_key_helper(self):
+    def __flat_keys_helper(self):
         for key, value in self.items():
             if type(value) is dict or isinstance(value, deepdict):
                 modval = deepdict(value)
-                yield from ({k for k in modval.__flat_key_helper()})
+                yield from ({k for k in modval.__flat_keys_helper()})
             elif (type(value) is list or type(value) is tuple) and type(value) is not str:
                 for ele in value:
                     if type(ele) is dict or isinstance(value, deepdict):
                         modval = deepdict(ele)
-                        yield from ({k for k in modval.__flat_key_helper()})
+                        yield from ({k for k in modval.__flat_keys_helper()})
             yield key
     
     def flat_keys(self):
-        return [key for key in self.__flat_key_helper()]
+        return [key for key in self.__flat_keys_helper()]
+    
+    
+    def __flat_values_helper(self):
+        for key, value in self.items():
+            if type(value) is dict or isinstance(value, deepdict):
+                modval = deepdict(value)
+                yield from ({v for v in modval.__flat_values_helper()})
+            elif (type(value) is list or type(value) is tuple) and type(value) is not str:
+                for ele in value:
+                    if type(ele) is dict or isinstance(value, deepdict):
+                        modval = deepdict(ele)
+                        yield from ({v for v in modval.__flat_values_helper()})
+            yield value
+    
+    def flat_values(self):
+        return [value for value in self.__flat_values_helper()]
