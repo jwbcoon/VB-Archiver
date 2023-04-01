@@ -1,4 +1,5 @@
 from schema import Schema, Optional, Use, And, Or
+from vba.py.lib.deepdict import deepdict
 import os
 import re
 
@@ -542,7 +543,7 @@ sched_opts based on Windows Task Scheduler XML exports
 
     - Details on each key's usage described in YDL_SCHEMA, or github link above
 '''
-BASE_YDL_OPTS = dict.fromkeys(['version', 'update', 'ignore-errors', 'abort-on-error',
+BASE_YDL_OPTS = deepdict(dict.fromkeys(['version', 'update', 'ignore-errors', 'abort-on-error',
                                'default-search', 'ignore-config', 'config-location',
                                'flat-playlist', 'mark-watched', 'no-mark-watched', 'proxy',
                                'socket-timeout', 'source-address', 'force-ipv4', 'force-ipv6',
@@ -570,15 +571,23 @@ BASE_YDL_OPTS = dict.fromkeys(['version', 'update', 'ignore-errors', 'abort-on-e
                                'audio-quality', 'recode-video', 'postprocessor-args', 'keep-video',
                                'no-post-overwrites', 'embed-subs', 'embed-thumbnail', 'add-metadata',
                                'metadata-from-title', 'xattrs', 'fixup', 'prefer-avconv', 'prefer-ffmpeg',
-                               'ffmpeg-location', 'exec', 'convert-subs'])
+                               'ffmpeg-location', 'exec', 'convert-subs']))
 
-BASE_SCHED_OPTS = {
+BASE_SCHED_OPTS = deepdict({
     'registration-info': {
         'date': None, # task creation date
         'author': None, # task author
         'URI': None, # identifier for the task
     },
-    'triggers': {},
+    'triggers': {
+            'calendar-trigger': {
+                    'start-boundary': None,
+                    'end-boundary': None,
+                    'repetition': {
+                        'interval': None
+                    }
+            }
+        },
     'principals': [{
         'principal': {
             'user-id': None # user id under whose permissions the task will be run
@@ -594,4 +603,4 @@ BASE_SCHED_OPTS = {
             'command': None # the command to be executed by the windows task scheduler
         }
     }
-}
+})

@@ -22,7 +22,7 @@ class deepdict(dict):
                     if type(ele) is dict or isinstance(value, deepdict):
                         modval = deepdict(ele)
                         subnestval = ({k: v for k, v in modval.modified_items(modify_key, modify_value)})
-                        yield (modkey, subnestval)
+                    yield (modkey, subnestval)
             else:
                 modval = modify_value(value)
                 yield (modkey, modval)
@@ -76,22 +76,22 @@ class deepdict(dict):
 
         - value_false: method to modify keys with when value_conditional evaluates to false.
 
-        - key_two_args: if true, pass two args to key_true and key_false methods.
+        - two_key_args: if true, pass two args to key_true and key_false methods.
                         if false, pass one arg to key_true and key_false methods.
         
-        - value_two_args: if true, pass two args to value_true and value_false methods.
+        - two_value_args: if true, pass two args to value_true and value_false methods.
                           if false, pass one arg to value_true and value_false methods.
     '''
     def conditional_items(self, presence_conditional=lambda k, v: True,
                           key_conditional=lambda k, v: True, value_conditional=lambda k, v: True,
-                          key_true=lambda k, v=None: k, key_false=lambda k, v=None: k,
-                          value_true=lambda v, k=None: v, value_false=lambda v, k=None: v,
-                          key_two_args=False, value_two_args=False):
+                          key_true=lambda k=None, v=None: k, key_false=lambda k=None, v=None: k,
+                          value_true=lambda k=None, v=None: v, value_false=lambda k=None, v=None: v,
+                          two_key_args=False, two_value_args=False):
         for key, value in self.items():
             modify_key = key_true if key_conditional(key, value) else key_false
             modify_value = value_true if value_conditional(key, value) else value_false
 
-            modkey = modify_key(key, v=value) if key_two_args else modify_key(key)
+            modkey = modify_key(k=key, v=value) if two_key_args else modify_key(k=key)
             if type(value) is dict or isinstance(value, deepdict):
                 modval = deepdict(value)
                 nestval = (
@@ -103,8 +103,8 @@ class deepdict(dict):
                                                          key_false,
                                                          value_true,
                                                          value_false,
-                                                         key_two_args,
-                                                         value_two_args)
+                                                         two_key_args,
+                                                         two_value_args)
                     if presence_conditional(k, v)
                 } )
                 yield (modkey, nestval)
@@ -121,13 +121,13 @@ class deepdict(dict):
                                                              key_false,
                                                              value_true,
                                                              value_false,
-                                                             key_two_args,
-                                                             value_two_args)
+                                                             two_key_args,
+                                                             two_value_args)
                         if presence_conditional(k, v)
                         } )
                         yield (modkey, subnestval)
             else:
-                modval = modify_value(value, k=key) if value_two_args else modify_value(value)
+                modval = modify_value(k=key, v=value) if two_value_args else modify_value(v=value)
                 if presence_conditional(key, value):
                     yield (modkey, modval)
 
@@ -161,17 +161,17 @@ class deepdict(dict):
 
         - value_false: method to modify keys with when value_conditional evaluates to false.
 
-        - key_two_args: if true, pass two args to key_true and key_false methods.
+        - two_key_args: if true, pass two args to key_true and key_false methods.
                         if false, pass one arg to key_true and key_false methods.
         
-        - value_two_args: if true, pass two args to value_true and value_false methods.
+        - two_value_args: if true, pass two args to value_true and value_false methods.
                           if false, pass one arg to value_true and value_false methods.
     '''
     def conditional_copy(self, presence_conditional=lambda k, v: True,
                          key_conditional=lambda k, v: True, value_conditional=lambda k, v: True,
-                         key_true=lambda k, v=None: k, key_false=lambda k, v=None: k,
-                         value_true=lambda v, k=None: v, value_false=lambda v, k=None: v,
-                         key_two_args=False, value_two_args=False):
+                         key_true=lambda k=None, v=None: k, key_false=lambda k=None, v=None: k,
+                         value_true=lambda k=None, v=None: v, value_false=lambda k=None, v=None: v,
+                         two_key_args=False, two_value_args=False):
         return deepdict(
             {key: value for key, value in self.conditional_items(presence_conditional,
                                                                  key_conditional,
@@ -180,5 +180,20 @@ class deepdict(dict):
                                                                  key_false,
                                                                  value_true,
                                                                  value_false,
-                                                                 key_two_args,
-                                                                 value_two_args)})
+                                                                 two_key_args,
+                                                                 two_value_args)})
+    
+    def __flat_key_helper(self):
+        for key, value in self.items():
+            if type(value) is dict or isinstance(value, deepdict):
+                modval = deepdict(value)
+                yield from ({k for k in modval.__flat_key_helper()})
+            elif (type(value) is list or type(value) is tuple) and type(value) is not str:
+                for ele in value:
+                    if type(ele) is dict or isinstance(value, deepdict):
+                        modval = deepdict(ele)
+                        yield from ({k for k in modval.__flat_key_helper()})
+            yield key
+    
+    def flat_keys(self):
+        return [key for key in self.__flat_key_helper()]
