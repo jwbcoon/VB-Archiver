@@ -60,9 +60,7 @@ YDL_SCHEMA = Schema(
         # location of the configuration file; either the path to the config or its containing directory
         Optional('flat-playlist'): True,
         # do not extract the videos of a playlist, only list them
-        Optional('mark-watched'): True,
-        # Youtube only
-        Optional('no-mark-watched'): True,
+        Optional(Or('mark-watched', 'no-mark-watched')): True,
         # Youtube only
 
         # NETWORK OPTIONS
@@ -78,10 +76,8 @@ YDL_SCHEMA = Schema(
         # time to wait before giving up, in seconds
         Optional('source-address'): str,
         # client-side IP address to bind to
-        Optional('force-ipv4'): True,
-        # make all connections via IPv4
-        Optional('force-ipv6'): True,
-        # make all connections via IPv6
+        Optional(Or('force-ipv4', 'force-ipv6')): True,
+        # make all connections via IPv4 or via IPv6
 
         # GEO RESTRICTION OPTIONS
 
@@ -135,10 +131,8 @@ YDL_SCHEMA = Schema(
                                 # --match-filter "like_count > 100 &
                                 # dislike_count <? 50 & description" .
                                 
-        Optional('no-playlist'): True,
-        # download only the video, if the specified URL refers to a video and a playlist
-        Optional('yes-playlist'): True,
-        # download the playlist, if the specified URL refers to a video and a playlist
+        Optional(Or('no-playlist', 'yes-playlist')): True,
+        # download only the video or the whole playlist, if the specified URL refers to a video and a playlist
         Optional('age-limit'): True,
         # download only videos suitable for the given age
         Optional('download-archive'): True,
@@ -165,16 +159,12 @@ YDL_SCHEMA = Schema(
         # do not automatically adjust the buffer size. By default, the buffer size is automatically resized from the initial value
         Optional('http-chunk-size'): str,
         # size of a chunk for chunk-based HTTP downloading (e.g. 10485760 or 10M) (default is disabled). May be useful for bypassing bandwidth throttling imposed by a webserver (experimental)
-        Optional('playlist-reverse'): True,
-        # download playlist videos in reverse order
-        Optional('playlist-random'): True,
-        # download playlist videos in random order
+        Optional(Or('playlist-reverse', 'playlist-random')): True,
+        # download playlist videos in reverse or random order
         Optional('xattr-set-filesize'): True,
         # set file xattribute ytdl.filesize with expected file size
-        Optional('hls-prefer-native'): True,
-        # use the native HLS downloader instead of ffmpeg
-        Optional('hls-prefer-ffmpeg'): True,
-        # use ffmpeg instead of the native HLS downloader
+        Optional(Or('hls-prefer-native', 'hls-prefer-ffmpeg')): True,
+        # use the native HLS downloader instead of ffmpeg or use ffmpeg instead of the native HLS downloader
         Optional('hls-use-mpegts'): True,
         # use the mpegts container for HLS videos, allowing to play the video while downloading (some players may not be able to play it)
         Optional('external-downloader'): str,
@@ -197,12 +187,11 @@ YDL_SCHEMA = Schema(
         # restrict filenamess to only ASCII characters, and avoid "&" and spaces in filenames
         Optional('no-overwrites'): True,
         # do not overwrite files
-        Optional('continue'): True,
+        Optional(Or('continue', 'no-continue')): True,
         # force resume of partially downloaded files. By default, youtube-dl will resume downloads if possible.
-        Optional('no-continue'): True,
-        # do not resume partially downloaded files (restart from beginning)
-        Optional('no-part'): True,
-        # do not use .part files - write directly into output file
+        # OR do not resume partially downloaded files (restart from beginning)
+        Optional('no-part'): True, 
+        # do not use .part files
         Optional('no-mtime'): True,
         # do not use the last-modified header to set the file modification time
         Optional('write-description'): True,

@@ -1,7 +1,6 @@
 from vba.py.lib.models import BASE_SCHED_OPTS, SYSTEM_ID, XML_SCHEMA
 from vba.py.lib.vba_schedule import vba_schedule as vbas
 from vba.py.lib.deepdict import deepdict
-from copy import deepcopy
 from xml.dom.minidom import parseString
 import dicttoxml as dtx
 import subprocess
@@ -59,12 +58,7 @@ def generatexml(sched_dict: deepdict, write=False, pretty=False):
         raise
 
     xml_string = parseString(xml_bytes)
-
-    if pretty:
-        xml_string = xml_string.toprettyxml()
-    else:
-        xml_string = xml_string.toxml()
-
+    xml_string = xml_string.toprettyxml() if pretty else xml_string.toxml()
     xml_string = xml_string.replace(
             '<Task>',
             '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">'
