@@ -17,12 +17,20 @@ class deepdict(dict):
                 modval = deepdict(value)
                 nestval = ({k: v for k, v in modval.modified_items(modify_key, modify_value)})
                 yield (modkey, nestval)
-            elif (type(value) is list or type(value) is tuple) and type(value) is not str:
+            elif type(value) is not str:
+                modlist = []
                 for ele in value:
                     if type(ele) is dict or isinstance(value, deepdict):
                         modval = deepdict(ele)
                         subnestval = ({k: v for k, v in modval.modified_items(modify_key, modify_value)})
-                    yield (modkey, subnestval)
+                        modlist.extend([subnestval])
+                    else:
+                        modval = modify_key(ele)
+                        modlist.extend(modval)
+                if type(ele) is list:
+                    yield (modkey, modlist)
+                if type(ele) is tuple:
+                    yield (modkey, tuple(modlist))
             else:
                 modval = modify_value(value)
                 yield (modkey, modval)

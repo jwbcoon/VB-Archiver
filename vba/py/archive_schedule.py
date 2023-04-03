@@ -104,7 +104,6 @@ def contents(vb: vbas) -> dict: # receive vbas object to dissect contents and ex
 
     return {'args': args, 'output_path': output_path}
 
-
 current = init_vbas()
 
 if __name__ == '__main__':
