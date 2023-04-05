@@ -13,23 +13,16 @@ class deepdict(dict):
     def modified_items(self, modify_key=lambda a: a, modify_value=lambda a: a):
         for key, value in self.items():
             modkey = modify_key(key)
-            if type(value) is dict or isinstance(value, deepdict):
+            if isinstance(value, dict):
                 modval = deepdict(value)
                 nestval = ({k: v for k, v in modval.modified_items(modify_key, modify_value)})
                 yield (modkey, nestval)
-            elif type(value) is not str:
-                modlist = []
-                for ele in value:
-                    if type(ele) is dict or isinstance(value, deepdict):
-                        modval = deepdict(ele)
-                        subnestval = ({k: v for k, v in modval.modified_items(modify_key, modify_value)})
-                        modlist.extend([subnestval])
-                    else:
-                        modval = modify_key(ele)
-                        modlist.extend(modval)
-                if type(ele) is list:
+            elif (type(value) is list or type(value) is tuple) and type(value) is not str:
+                modlist = [listitem for listitem in (({k: v for k, v in deepdict(ele).modified_items(modify_key, modify_value)})
+                           for ele in value if type(ele) is dict or isinstance(ele, deepdict))]
+                if type(value) is list:
                     yield (modkey, modlist)
-                if type(ele) is tuple:
+                if type(value) is tuple:
                     yield (modkey, tuple(modlist))
             else:
                 modval = modify_value(value)
@@ -117,23 +110,23 @@ class deepdict(dict):
                 } )
                 yield (modkey, nestval)
             elif (type(value) is list or type(value) is tuple) and type(value) is not str:
-                for ele in value:
-                    if type(ele) is dict or isinstance(value, deepdict):
-                        modval = deepdict(ele)
-                        subnestval = (
-                        { k: v
-                        for k, v in modval.conditional_items(presence_conditional,
-                                                             key_conditional,
-                                                             value_conditional,
-                                                             key_true,
-                                                             key_false,
-                                                             value_true,
-                                                             value_false,
-                                                             two_key_args,
-                                                             two_value_args)
-                        if presence_conditional(k, v)
-                        } )
-                        yield (modkey, subnestval)
+                modlist = [listitem for listitem in ((
+                          { k: v
+                          for k, v in deepdict(ele).conditional_items(presence_conditional,
+                                                                      key_conditional,
+                                                                      value_conditional,
+                                                                      key_true,
+                                                                      key_false,
+                                                                      value_true,
+                                                                      value_false,
+                                                                      two_key_args,
+                                                                      two_value_args)
+                          if presence_conditional(k, v)
+                          } ) for ele in value if type(ele) is dict or isinstance(value, deepdict))]
+                if type(value) is list:
+                    yield (modkey, modlist)
+                if type(value) is tuple:
+                    yield (modkey, tuple(modlist))
             else:
                 modval = modify_value(k=key, v=value) if two_value_args else modify_value(v=value)
                 if presence_conditional(key, value):

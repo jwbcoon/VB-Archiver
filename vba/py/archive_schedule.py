@@ -36,7 +36,6 @@ def init_schedule() -> dict:
         return v
 
     schedule = BASE_SCHED_OPTS.conditional_copy(
-        value_conditional=lambda k, v: k in BASE_SCHED_OPTS.flat_keys(),
         value_true=init_values,
         two_value_args=True)
         
@@ -52,8 +51,8 @@ def generatexml(sched_dict: deepdict, write=False, pretty=False):
     xml_dict = XML_SCHEMA.validate(sched_dict).modified_copy(modify_key=camelcase)
     try:
         xml_bytes = dtx.dicttoxml(xml_dict,
-                                custom_root='Task',
-                                attr_type=False)
+                                  custom_root='Task',
+                                  attr_type=False)
     except:
         raise
 
@@ -64,7 +63,13 @@ def generatexml(sched_dict: deepdict, write=False, pretty=False):
             '<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">'
             ).replace(
             '<?xml version=\"1.0\" ?>',
-            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>' )
+            '<?xml version=\"1.0\" encoding=\"UTF-16\"?>'
+            ).replace(
+            '<item>',
+            ''
+            ).replace(
+            '</item>',
+            '' )
         
     if write:
         try:
