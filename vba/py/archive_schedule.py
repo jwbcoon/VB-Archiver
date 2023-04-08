@@ -2,9 +2,9 @@ from vba.py.lib.models import BASE_SCHED_OPTS, SYSTEM_ID, XML_SCHEMA
 from vba.py.lib.vba_schedule import vba_schedule as vbas
 from vba.py.lib.deepdict import deepdict
 from xml.dom.minidom import parseString
-import dicttoxml as dtx
+import dicttoxml
 import subprocess
-import datetime as dt
+import datetime
 import os
 
 # initialize a base vba_schedule to manage vba download schedules
@@ -15,7 +15,7 @@ def init_vbas() -> vbas:
 
 # initialize a base schedule config for users to interface with
 def init_schedule() -> dict:
-    def init_values(date=dt.datetime.now(), k=None, v=None):
+    def init_values(date=datetime.datetime.now(), k=None, v=None):
         if k == 'date':
             return date.isoformat()
         if k == 'author':
@@ -25,9 +25,9 @@ def init_schedule() -> dict:
         if k == 'start-boundary':
             return date.isoformat()
         if k == 'end-boundary':
-            return (date + dt.timedelta(minutes=1)).isoformat()
-        if k == 'interval':
-            return 'PT1M'
+            return (date + datetime.timedelta(days=1)).isoformat()
+        if k == 'time_interval':
+            return wts_interval(datetime.timedelta(minutes=2))
         if k == 'user-id':
             return SYSTEM_ID # Windows Task Scheduler SYSTEM user-id
         if k == 'command':
@@ -50,7 +50,7 @@ def generatexml(sched_dict: deepdict, write=False, pretty=False):
     camelcase = lambda hyphen_str: (''.join([s.capitalize() for s in hyphen_str.replace('-',' ').split()])).replace('Uri', 'URI')
     xml_dict = XML_SCHEMA.validate(sched_dict).modified_copy(modify_key=camelcase)
     try:
-        xml_bytes = dtx.dicttoxml(xml_dict,
+        xml_bytes = dicttoxml.dicttoxml(xml_dict,
                                   custom_root='Task',
                                   attr_type=False)
     except:
@@ -82,6 +82,25 @@ def generatexml(sched_dict: deepdict, write=False, pretty=False):
 
     return xml_string
 
+def wts_interval(time_interval: datetime):
+    interval_string = []
+    for attr in ['year', 'month', 'day', 'hour', 'minute', 'second']:
+        val = getattr(time_interval, attr)
+        if attr == 'year':
+            interval_string.append('{}Y'.format(val))
+        if attr == 'month':
+            interval_string.append('{}M'.format(val))
+        if attr == 'day':
+            interval_string.append('{}D'.format(val))
+        if attr == 'hour':
+            interval_string.append('{}H'.format(val))
+        if attr == 'minute':
+            interval_string.append('{}M'.format(val))
+        if attr == 'second':
+            interval_string.append('{}S'.format(val))
+    
+    return ' '.join(interval_string)
+
 # Make a video archive schedule
 def start_schedule(task_name, xml_file):
     task_command = ['schtasks.exe',
@@ -112,5 +131,5 @@ def contents(vb: vbas) -> dict: # receive vbas object to dissect contents and ex
 current = init_vbas()
 
 if __name__ == '__main__':
-    print(generatexml(current.sched_opts, pretty=True))
+    print(wts_interval(datetime.datetime.now()))
     #start_schedule('vb-archiver', os.path.abspath( os.path.join(os.path.split(os.path.dirname(__file__))[0], './settings/xml/vb_archiver.xml') ))

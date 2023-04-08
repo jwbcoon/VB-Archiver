@@ -51,15 +51,15 @@ class vba_schedule(tuple):
     '''
     def copy_ydl(self, src_dict=None, src_vbas=None):
         if src_dict and isinstance(src_dict, dict):
-            self.ydl_opts = deepcopy(src_dict)
+            self.ydl_opts = deepdict(src_dict)
         elif src_vbas and isinstance(src_vbas, vba_schedule):
-            self.ydl_opts = deepcopy(src_vbas[0])
+            self.ydl_opts = deepdict(src_vbas[0])
 
     '''
     Deep copy the schedule of src_vbas into self
     '''
     def copy_sched(self, src_dict=None, src_vbas=None):
         if src_dict and isinstance(src_dict, dict):
-            self.sched_opts.update(deepcopy(src_dict))
+            self.sched_opts.update(deepdict(src_dict))
         elif src_vbas and isinstance(src_vbas, vba_schedule):
-            self.sched_opts.update(deepcopy(src_vbas.sched_opts))
+            self.sched_opts.update(deepdict(src_vbas.sched_opts))
